@@ -1,0 +1,11 @@
+{
+  "devDependencies": {
+    "@nolebase/vitepress-plugin-git-changelog": "^2.18.2",
+    "vitepress": "^2.0.0-alpha.13"
+  },
+  "scripts": {
+    "docs:dev": "vitepress dev",
+    "docs:build": "vitepress build",
+    "docs:preview": "vitepress preview"
+  }
+}
