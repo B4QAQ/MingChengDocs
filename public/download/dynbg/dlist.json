@@ -1,0 +1,62 @@
+[
+    {
+        "url":  "/overcast_dark.png",
+        "hash":  "C92BDD66B540D2C14C36C335BE37B68F0977A7BEF19020318571E8B7CA119096",
+        "size":  61747
+    },
+    {
+        "url":  "/overcast_light.png",
+        "hash":  "394C36D07B3E0989FD54AA528AB68123B93F86FB0269E78426B8FA40CD17BE30",
+        "size":  77163
+    },
+    {
+        "url":  "/rain_dark.png",
+        "hash":  "99C8D0844946B5C27FB73F5771E1DEE9441FCABD4A972CAA6EBAF85C7846AC9A",
+        "size":  56762
+    },
+    {
+        "url":  "/rain_light.png",
+        "hash":  "7EC22278C19E7E87C030F553EBF4A4BE54AAD64AE7BD6392A77A7C8BF4BE78FB",
+        "size":  58567
+    },
+    {
+        "url":  "/sand_dark.png",
+        "hash":  "99B82200BF32C9DDCDDD7914461AEC56E1DA73F696075F33247A5278F6648114",
+        "size":  56755
+    },
+    {
+        "url":  "/sand_light.png",
+        "hash":  "DEEBBB1DC29C8FC4D691543D3F18C2C791117E5B333890032459DEAC1272A809",
+        "size":  50518
+    },
+    {
+        "url":  "/small_sand_dark.png",
+        "hash":  "688C9289803AFEBDDE5322BE7C4A2B6A36C28BFC83343D8A1AB0060E506846AE",
+        "size":  55456
+    },
+    {
+        "url":  "/small_sand_light.png",
+        "hash":  "31F1F31BD916DD33F7B010D847F4E5CBB8D6E48F51B17136AE46967F2372212B",
+        "size":  49687
+    },
+    {
+        "url":  "/snow_dark.png",
+        "hash":  "1935D974CB78A59396FBEBA2AA613A0C59CDB08FAD6D6F64345667FEA82B6093",
+        "size":  60687
+    },
+    {
+        "url":  "/snow_light.png",
+        "hash":  "3EFEB2DA8565DAFF2C4BA101D0FFC72DB8925D94E4DBA949AB08451BECCA0646",
+        "size":  61966
+    },
+    {
+        "url":  "/sun_dark.png",
+        "hash":  "F0D7EDB876C91FCC78A09BFC66DFC80E28B4CBED8C20CED2D2217F6B69F72C37",
+        "size":  43799
+    },
+    {
+        "url":  "/sun_light.png",
+        "hash":  "9BBFDC8A23E0727A3321A1A8536990BF37ACDE0D8FD62F5B80CC770B67C0766F",
+        "size":  53977
+    }
+]

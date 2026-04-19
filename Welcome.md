@@ -14,7 +14,7 @@ order: 1
 
 本文档主要包含以下内容：
 
-- **前言**：包含文档的基本介绍和使用说明
+- **前言**：包含文档的基本介绍
 - **MingChengAPI**：MingChengAPI接口能力文档
 - **Eternal**：包含Eternal的应用参数,LUA表盘开发,项目文档
 
@@ -22,7 +22,7 @@ order: 1
 
 如果您是首次使用 MingChengAPI，建议按照以下步骤开始：
 
-1. 阅读 **MingChengAPI/前言** 了解基本概念
+1. 阅读 **MingChengAPI/前言** 了解基本接入方式
 2. 查看 **MingChengAPI/授权API** 了解如何获取和使用授权
 3. 参考 **MingChengAPI/开发者API** 开始集成开发
 4. 使用 **MingChengAPI/应用管理API** 管理您的应用

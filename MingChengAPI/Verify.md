@@ -75,14 +75,35 @@ GET /verifyCheck/testapp?data=xxx.xxx.xxx.xxx
   "status": 200,
   "result": {
     "APIKey": "signed_api_key",
-    "status": "pass"
+    "signature": "signature"
   }
 }
 ```
-
+#### 应用建议
+返回的APIKey不要直接存储，要经过signature验证签名后在进行存储  
+针对于Vela设备，代码如下：
+```JavaScript
+crypto.verify({
+  data: Req.result.APIKey,
+  algo: 'RSA-SHA256',
+  publicKey: this.pubKey, //替换为你的公钥
+  signature: Req.result.signature,
+  success: (res) => {
+    try{
+      prompt.showToast({message: '验证成功',duration: 2000})
+      //这里就可以保存APIKey了
+    }catch(e){
+      prompt.showToast({message: JSON.stringify(e),duration: 2000})
+    }
+  },
+  fail: function(data, code) {
+    prompt.showToast({message: '签名验证失败' + code,duration: 2000})
+  }
+});
+```
 **状态码说明**：
 - 200: 验证通过
-- 201: 设备未找到（pending 状态）
+- 201: 设备未找到
 - 400: 参数不完整/应用不存在
 - 403: 设备被封禁
 - 500: 验证失败

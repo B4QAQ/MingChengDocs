@@ -1,7 +1,10 @@
 # Eternal 相关文档
 
 本文为 Eternal 相关文档，支持开发者为其开发LUA表盘，依照Storage.js或getWeather.js直接二次开发其他天气APP
-![Powered by MingChengAPI](https://img.shields.io/badge/Powered_by-MingChengAPI-brightgreen)
+![Powered by MingChengAPI](https://img.shields.io/badge/Powered_by-MingChengAPI-brightgreen)  
+::: warning
+本文档已严重过时，请等待更新！
+:::
 ## 文档列表
 ### 开发者使用文档
 1.[开发者API](./DevUse.md) - 含有Eternal的存储逻辑和存储位置
