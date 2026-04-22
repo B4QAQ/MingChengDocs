@@ -69,7 +69,7 @@ export default defineConfig({
       {
         text: 'Eternal',
         items: [
-          { text: 'README', link: '/Eternal/README' },
+          { text: '介绍', link: '/Eternal/Index' },
           { text: '初始化相关', link: '/Eternal/Initialization' },
           { text: '基础文件操作', link: '/Eternal/BasicFileOperations' },
           { text: '城市管理', link: '/Eternal/CityManagement' },
