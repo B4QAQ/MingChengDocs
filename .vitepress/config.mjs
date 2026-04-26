@@ -70,11 +70,14 @@ export default defineConfig({
         text: 'Eternal',
         items: [
           { text: '介绍', link: '/Eternal/Index' },
+          { text: '支持文档', link: '/Eternal/Official' },
           { text: '初始化相关', link: '/Eternal/Initialization' },
           { text: '基础文件操作', link: '/Eternal/BasicFileOperations' },
           { text: '城市管理', link: '/Eternal/CityManagement' },
           { text: '设置管理', link: '/Eternal/SettingsManagement' },
           { text: '天气数据管理', link: '/Eternal/WeatherDataManagement' },
+          { text: '多线程文件下载', link: '/Eternal/Download' },
+          { text: '智能天气预测', link: '/Eternal/AutoPrediction' },
           { text: '开发者使用', link: '/Eternal/DevUse' }
         ]
       }

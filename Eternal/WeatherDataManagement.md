@@ -23,7 +23,7 @@
 **失败**:
 - 抛出异常，错误信息在控制台输出 `[X]更新天气失败: {error}`
 
----
+
 
 ## `mergeWeatherData(existingData, newData)`
 
@@ -105,7 +105,7 @@
 ]
 ```
 
----
+
 
 ## `updateWarn(location)`
 
@@ -124,7 +124,7 @@
 **失败**:
 - 抛出异常，错误信息在控制台输出 `[X]更新预警失败: {error}`
 
----
+
 
 ## `saveWeatherFile(lat, lon, type, data)`
 
@@ -140,7 +140,7 @@
 - 成功: `true` (Promise resolve)
 - 失败: 抛出异常 `写入失败: {code}`
 
----
+
 
 ## `getWeather(location, type)`
 
@@ -282,7 +282,7 @@
 **失败**:
 - `null`（未找到今天的天气数据或读取失败）
 
----
+
 
 ## `getWarn(location)`
 

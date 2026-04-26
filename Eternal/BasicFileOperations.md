@@ -15,7 +15,6 @@
 **失败或文件不存在**:
 - `null`
 
----
 
 ## `writeJsonFile(path, data)`
 
@@ -33,7 +32,6 @@
 **失败**:
 - 抛出异常 `写入失败: {code}`
 
----
 
 ## `deleteDir(path)`
 
@@ -50,7 +48,6 @@
 **失败**:
 - `false` (Promise resolve)
 
----
 
 ## `deleteFile(path)`
 
