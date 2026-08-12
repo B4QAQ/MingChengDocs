@@ -20,7 +20,7 @@ export function BrandTitle({ className }: { className?: string }) {
     <span className={`inline-flex items-center gap-2 mx-1 ${className ?? ""}`}>
       <BrandIcon />
       <span
-        className="text-[15px] font-bold tracking-tight text-fd-foreground"
+        className="text-[17px] font-bold tracking-tight text-fd-foreground leading-none"
         style={{ fontFamily: "var(--font-sans)" }}
       >
         DOCS
