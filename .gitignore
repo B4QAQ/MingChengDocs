@@ -1,0 +1,39 @@
+# dependencies
+node_modules/
+
+# next.js
+.next/
+out/
+
+# generated source for fumadocs-mdx
+.source/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# environment variables
+.env
+.env.production
+
+# macOS-specific files
+.DS_Store
+tsconfig.tsbuildinfo
+*.tsbuildinfo
+
+# generated sitemap (auto-generated during build)
+public/sitemap.xml
+
+# docs content & images are now part of this repo (not fetched from sub-repo)
+# content/docs
+# content/blog
+# public/assets/images/docs
+# public/assets/images/blog
+.docs-content-cache
+
+# local subrepo clone managed by abdocstool.py
+.subrepo
+
+.opencode

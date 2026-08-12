@@ -1,0 +1,7 @@
+{
+  "title": "铭诚API",
+  "icon": "Code",
+  "description": "高自由度、开放的第三方快应用API服务",
+  "root": true,
+  "pages": ["index", "base", "qweather", "notice", "mail", "payment", "terms"]
+}

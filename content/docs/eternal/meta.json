@@ -1,0 +1,7 @@
+{
+  "title": "永昼天气",
+  "icon": "Sun",
+  "description": "功能强大的全能型天气快应用文档",
+  "root": true,
+  "pages": ["index", "usage", "changelog", "dev-guide", "privacy"]
+}

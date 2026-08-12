@@ -1,0 +1,197 @@
+---
+title: 邮件服务
+icon: Mail
+description: 邮箱概览、邮件列表、发送邮件等功能
+---
+
+> 模块类型: system | 权限等级: verify
+<Callout type="warn">
+需要应用启用`qweather`服务
+</Callout>
+<Callout type="warn">
+仍在调试开发，尽情期待
+</Callout>
+## 邮箱概览
+
+| 项目 | 内容 |
+|------|------|
+| **API** | `POST /api/v2/mail/overview/:appname` |
+| **说明** | 获取邮箱文件夹列表及未读数 |
+
+**参数：**
+
+| 参数 | 位置 | 必填 | 说明 |
+|------|------|------|------|
+| `appname` | path | 是 | 应用名 |
+| `Key` | body | 是 | 设备 API Key |
+| `email` | body | 是 | 邮箱地址 |
+| `imapPass` | body | 是 | IMAP 密码/授权码 |
+| `imapHost` | body | 是 | IMAP 服务器地址 |
+| `imapPort` | body | 否 | IMAP 端口 |
+
+---
+
+## 邮件列表
+
+| 项目 | 内容 |
+|------|------|
+| **API** | `POST /api/v2/mail/list/:appname` |
+| **说明** | 获取邮件列表 |
+
+**参数：**
+
+| 参数 | 位置 | 必填 | 说明 |
+|------|------|------|------|
+| `Key` | body | 是 | 设备 API Key |
+| `email` | body | 是 | 邮箱地址 |
+| `imapPass` | body | 是 | IMAP 密码 |
+| `imapHost` | body | 是 | IMAP 服务器 |
+| `imapPort` | body | 否 | IMAP 端口 |
+| `page` | body | 否 | 页码 |
+| `pageSize` | body | 否 | 每页数量 |
+| `folder` | body | 否 | 文件夹名（默认 INBOX） |
+| `textOverflow` | body | 否 | 正文截断长度 |
+
+---
+
+## 邮件详情
+
+| 项目 | 内容 |
+|------|------|
+| **API** | `POST /api/v2/mail/info/:appname` |
+| **说明** | 获取邮件详情 |
+
+**参数：**
+
+| 参数 | 位置 | 必填 | 说明 |
+|------|------|------|------|
+| `Key` | body | 是 | 设备 API Key |
+| `email` | body | 是 | 邮箱地址 |
+| `imapPass` | body | 是 | IMAP 密码 |
+| `imapHost` | body | 是 | IMAP 服务器 |
+| `imapPort` | body | 否 | IMAP 端口 |
+| `emailId` | body | 是 | 邮件ID |
+| `Type` | body | 否 | 返回格式（默认 json） |
+| `textOverflow` | body | 否 | 正文截断长度 |
+
+---
+
+## 获取文件夹列表
+
+| 项目 | 内容 |
+|------|------|
+| **API** | `POST /api/v2/mail/folders/:appname` |
+| **说明** | 获取邮箱文件夹列表 |
+
+---
+
+## 设置邮件标记
+
+| 项目 | 内容 |
+|------|------|
+| **API** | `POST /api/v2/mail/flag/:appname` |
+| **说明** | 设置邮件已读/未读/标记状态 |
+
+**参数：**
+
+| 参数 | 位置 | 必填 | 说明 |
+|------|------|------|------|
+| `Key` | body | 是 | 设备 API Key |
+| `email` | body | 是 | 邮箱地址 |
+| `imapPass` | body | 是 | IMAP 密码 |
+| `imapHost` | body | 是 | IMAP 服务器 |
+| `emailId` | body | 是 | 邮件ID |
+| `action` | body | 是 | 操作：`seen` / `unseen` / `flagged` / `unflagged` |
+
+---
+
+## 删除邮件
+
+| 项目 | 内容 |
+|------|------|
+| **API** | `POST /api/v2/mail/delete/:appname` |
+| **说明** | 删除指定邮件 |
+
+---
+
+## 移动邮件
+
+| 项目 | 内容 |
+|------|------|
+| **API** | `POST /api/v2/mail/move/:appname` |
+| **说明** | 移动邮件到指定文件夹 |
+
+**参数：**
+
+| 参数 | 位置 | 必填 | 说明 |
+|------|------|------|------|
+| `targetFolder` | body | 是 | 目标文件夹 |
+
+---
+
+## 搜索邮件
+
+| 项目 | 内容 |
+|------|------|
+| **API** | `POST /api/v2/mail/search/:appname` |
+| **说明** | 搜索邮件 |
+
+**参数：**
+
+| 参数 | 位置 | 必填 | 说明 |
+|------|------|------|------|
+| `keyword` | body | 是 | 搜索关键词 |
+| `page` | body | 否 | 页码 |
+| `pageSize` | body | 否 | 每页数量 |
+
+---
+
+## 发送邮件
+
+| 项目 | 内容 |
+|------|------|
+| **API** | `POST /api/v2/mail/send/:appname` |
+| **说明** | 发送邮件 |
+
+**参数：**
+
+| 参数 | 位置 | 必填 | 说明 |
+|------|------|------|------|
+| `Key` | body | 是 | 设备 API Key |
+| `email` | body | 是 | 发件邮箱 |
+| `smtpPass` | body | 是 | SMTP 密码/授权码 |
+| `smtpHost` | body | 是 | SMTP 服务器 |
+| `smtpPort` | body | 否 | SMTP 端口 |
+| `body` | body | 是 | 邮件内容（to/subject/html/text/cc/bcc） |
+
+---
+
+## 验证邮箱配置
+
+| 项目 | 内容 |
+|------|------|
+| **API** | `POST /api/v2/mail/verify/:appname` |
+| **说明** | 验证邮箱 IMAP/SMTP 配置是否正确 |
+
+**参数：**
+
+| 参数 | 位置 | 必填 | 说明 |
+|------|------|------|------|
+| `Key` | body | 是 | 设备 API Key |
+| `email` | body | 是 | 邮箱地址 |
+| `imapPass` | body | 否 | IMAP 密码 |
+| `imapHost` | body | 否 | IMAP 服务器 |
+| `smtpPass` | body | 否 | SMTP 密码 |
+| `smtpHost` | body | 否 | SMTP 服务器 |
+
+**返回：**
+
+```json
+{
+  "status": 200,
+  "result": {
+    "imap": { "success": true, "message": "连接成功" },
+    "smtp": { "success": true, "message": "连接成功" }
+  }
+}
+```

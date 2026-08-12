@@ -1,0 +1,7 @@
+{
+  "title": "腕上信驿",
+  "icon": "Mail",
+  "description": "腕上信驿 WearPost - Vela 智能穿戴邮件客户端",
+  "root": true,
+  "pages": ["index", "usage", "changelog", "privacy"]
+}

@@ -1,0 +1,64 @@
+---
+title: 从此开始
+icon: Sun
+description: 功能强大的全能型天气快应用，支持多种布局和多城市天气管理
+---
+
+import {
+  SunIcon,
+  CloudIcon,
+  MapPinIcon,
+  CodeIcon,
+  BookOpenIcon,
+  SparkleIcon,
+} from "@phosphor-icons/react/dist/ssr";
+
+# 介绍
+**Eternal 永昼天气** 致力于做Vela天气应用的天花板  
+## 数据支持
+
+| 数据类型 | 最大获取量 |
+|----------|-----------|
+| 天气数据 | 30天 |
+| 小时数据 | 7天 |
+| 分钟降水 | 2小时 |
+| 空气质量 | 24小时 |
+| 预警信息 | 实时 |
+| 天气指数 | 完整 |
+
+## 核心功能
+
+- **长期存储** - 天气数据本地缓存，支持 30 天数据存储
+- **智能预测** - 小时天气智能预测，基于日数据推算
+- **分钟降水** - 未来 2 小时分钟级降水预报
+- **多城市** - 支持添加多个城市，城市排序
+- **多种布局** - 多种主页布局样式适配不同设备
+- **动态背景** - 根据天气和日出日落变化的动态背景
+- **动画支持** - 完善的页面切换和交互动画效果
+- **天气预警** - 实时天气预警推送和详情查看
+
+## 收费方案
+
+付费版: 价格为1.9元,应用内付款,每月900次请求  
+免费版: 每月50次请求,承诺永不添加任何影响使用体验的任何内容（包括广告）  
+## 快速导航
+
+<Callout type="warn">
+开发者文档仅更新了部分内容，其他文档未更新，请仔细甄别。
+</Callout>
+<Cards>
+  <Card
+    icon={<BookOpenIcon className="text-blue-400" weight="duotone" />}
+    title="使用指南"
+    href="/docs/eternal/usage"
+  >
+    了解永昼天气的基础使用方法
+  </Card>
+  <Card
+    icon={<CodeIcon className="text-purple-400" weight="duotone" />}
+    title="开发指南"
+    href="/docs/eternal/dev-guide"
+  >
+    学习开发 LUA 表盘或二次开发
+  </Card>
+</Cards>

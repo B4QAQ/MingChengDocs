@@ -1,0 +1,7 @@
+{
+  "title": "SimpleFetch",
+  "icon": "Link2",
+  "description": "AstroBox 网络桥接插件，让不支持联网的快应用也能自由发起 HTTP / SSE 请求",
+  "root": true,
+  "pages": ["index", "protocol", "usage", "changelog"]
+}

@@ -1,0 +1,143 @@
+---
+title: 使用指南
+icon: BookOpen
+description: 永昼天气的基础使用方法与官方文档
+---
+
+import {
+  SunIcon,
+  CloudIcon,
+  MapPinIcon,
+  DownloadIcon,
+  WatchIcon,
+  PowerIcon,
+  ArrowsClockwiseIcon,
+} from "@phosphor-icons/react/dist/ssr";
+
+本章讲解永昼天气(Eternal)的激活/使用,同步器激活/使用及注意事项
+
+<Cards>
+  <Card
+    icon={<WatchIcon className="text-emerald-400" weight="duotone" />}
+    title="支持设备型号"
+    href="#支持设备型号"
+  >
+    查看哪些手表/手环设备支持永昼天气及其联网方式
+  </Card>
+  <Card
+    icon={<PowerIcon className="text-blue-400" weight="duotone" />}
+    title="激活应用"
+    href="#激活应用"
+  >
+    通过 AstroBox 同步器插件完成购买与设备激活
+  </Card>
+  <Card
+    icon={<ArrowsClockwiseIcon className="text-purple-400" weight="duotone" />}
+    title="同步器功能详解"
+    href="#同步器功能详解"
+  >
+    天气同步、自定义背景、公告与设置等功能说明
+  </Card>
+</Cards>
+
+
+## 支持设备型号
+
+| 设备名称 | 支持情况 | 联网获取 |
+|------|-----|-----|
+| 小米WatchS5(eSIM) | √ | √ |
+| 小米WatchS4(eSIM) | √ | √ |
+| 小米WatchS3(eSIM) | (未知) | √ |
+| 红米Watch6 | √ | √ |
+| 红米Watch5(eSIM) | √ | √ |
+| 小米手环9 | ✕ | ✕ |
+| 小米手环9Pro | √ | √ |
+| 小米手环10 | √ | 通过SimpleFetch |
+| 小米手环10Pro | √ | 通过SimpleFetch |
+## 激活应用
+本应用分为两种激活方式:`同步器激活`与`快应用激活`  
+本次主要讲解`同步器激活`,快应用激活可以按照逐步提示激活!
+<Callout type="warn">
+如果您的爱发电备注栏为空,请勿购买!设备不会激活,也不会退款!
+</Callout>
+<Callout type="warn">
+如果您的爱发电备注栏为空,请勿购买!设备不会激活,也不会退款!
+</Callout>
+<Callout type="warn">
+如果您的爱发电备注栏为空,请勿购买!设备不会激活,也不会退款!
+</Callout>
+### 1.下载AstroBox并打开
+AstroBox 是业界领先的穿戴设备第三方工具箱
+<Callout type="info">
+Astrobox安装文档:https://abox.run/docs/usage/install
+</Callout>
+### 2.找到`永昼天气同步器`插件
+<ImageZoom
+  src="/assets/images/docs/Eternal/1.png"
+  alt="激活教程-1"
+/>
+### 3.安装插件
+<ImageZoom
+  src="/assets/images/docs/Eternal/2.png"
+  alt="激活教程-2"
+/>
+### 4.连接设备
+按照流程重启AstroBox后,设备应处于未连接状态,请先连接设备后再继续  
+<ImageZoom
+  src="/assets/images/docs/Eternal/3.png"
+  alt="激活教程-3"
+/>
+### 5.打开插件
+<ImageZoom
+  src="/assets/images/docs/Eternal/4.png"
+  alt="激活教程-4"
+/>
+### 6.准备验证
+<ImageZoom
+  src="/assets/images/docs/Eternal/5.png"
+  alt="激活教程-5"
+/>
+### 7.购买并验证
+<ImageZoom
+  src="/assets/images/docs/Eternal/6.png"
+  alt="激活教程-6"
+/>
+🎉✅📚✨ 大功告成！一切顺利的话,您已经验证成功 🎊🏆🚀  
+## 同步器功能详解
+本文将讲解同步器插件的主要功能与使用方法
+<Callout type="info">
+找不到对应功能Tab时，试试左右滑动上方的Tab栏，说不定它就藏在后面哦
+</Callout>
+### 1.同步天气数据
+同步器提供了完善的城市管理与天气同步的功能，为不支持Fetch的设备提供友好的同步方案
+<ImageZoom
+  src="/assets/images/docs/Eternal/sync-1.png"
+  alt="同步教程-1"
+/>
+<ImageZoom
+  src="/assets/images/docs/Eternal/sync-2.png"
+  alt="同步教程-2"
+/>
+### 2.自定义背景图
+<ImageZoom
+  src="/assets/images/docs/Eternal/func-1.png"
+  alt="功能图1-1"
+/>
+<Callout type="warn">
+1.请勿上传过大图片（300KB以上）,可能会导致黑屏不显示（建议先进行压缩,分辨率不大于1000*1000）  
+2.替换图片后需要重启设备刷新缓存后才能看到  
+3.请勿上传过亮图片以保证数据清晰可见  
+4.上传前请预留好足够的设备空间  
+</Callout>  
+### 3.公告
+跳转到公告Tab,点击刷新即可查看公告
+<ImageZoom
+  src="/assets/images/docs/Eternal/func-2.jpg"
+  alt="功能图2"
+/>
+### 4.设置
+覆盖授权管理，搜索设置，清空数据
+<ImageZoom
+  src="/assets/images/docs/Eternal/func-3.jpg"
+  alt="功能图3"
+/>

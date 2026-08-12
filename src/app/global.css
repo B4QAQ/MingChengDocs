@@ -1,0 +1,769 @@
+@import "tailwindcss";
+/* content/docs is populated from the separate content repo
+ * (AstroBox-NG-Plugin-Docs-Content) and gitignored in this repo.
+ * Tailwind v4's auto-detection skips gitignored files, so explicitly
+ * register the directory so className utilities in MDX files are generated.
+ */
+@source "../../content/docs";
+@import "fumadocs-ui/css/neutral.css";
+@import "fumadocs-ui/css/preset.css";
+
+@font-face {
+    font-family: "Sarasa Mono";
+    src: url("/assets/fonts/SarasaMonoSC-Regular.woff2") format("woff2");
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Google Sans Flex";
+    src: url("/assets/fonts/GoogleSansFlex-VariableFont.ttf") format("truetype");
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+}
+
+@theme {
+    --color-primary-foreground: var(--color-fd-primary-foreground);
+    --font-sans:
+        "Google Sans Flex", "MiSans Chinese", "PingFang SC", "Microsoft YaHei",
+        sans-serif;
+    --font-mono:
+        "Sarasa Mono", "MiSans Chinese", "PingFang SC", "Microsoft YaHei",
+        monospace, sans-serif;
+}
+
+html.font-setting {
+    --font-sans:
+        "Google Sans Flex", "MiSans Chinese", "PingFang SC", "Microsoft YaHei",
+        sans-serif;
+}
+
+:root {
+    --default-font-family: var(--font-sans);
+    --default-mono-font-family: var(--font-mono);
+}
+
+html,
+body,
+button,
+input,
+select,
+textarea {
+    font-family: var(--font-sans);
+}
+
+/* Prevent horizontal scroll caused by decorative overflow elements
+   (e.g. navbar blurEffect at 120vw).
+   The fixed navbar's containing block is the initial containing block (html),
+   so we must clip at html too.
+   IMPORTANT: use `overflow-x: clip` on BOTH html and body, never `hidden` on
+   body. Per CSS Overflow 3, when one axis is `hidden` the other computes from
+   `visible` to `auto`, turning body into a sticky scroll container even though
+   the real scroll happens on html/viewport. That breaks position:sticky for the
+   docs sidebar (it scrolls away instead of staying fixed). `clip` does NOT
+   create a scroll container, so sticky positioning and native body scroll stay
+   intact. */
+html {
+    overflow-x: clip;
+}
+
+body {
+    overflow-x: clip;
+}
+
+.blog-cover {
+    width: 100%;
+    border-radius: 1rem;
+}
+
+@keyframes blog-cover-collapse {
+    from {
+        width: 100%;
+        border-radius: 0;
+    }
+
+    to {
+        width: 94%;
+        border-radius: 1.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .blog-cover {
+        animation: blog-cover-collapse linear both;
+        animation-timeline: scroll(root block);
+        animation-range: 0 14.0625vw;
+    }
+}
+
+@media (min-width: 1024px) and (prefers-reduced-motion: reduce) {
+    .blog-cover {
+        width: 94%;
+        border-radius: 1.5rem;
+        animation: none;
+    }
+}
+
+code,
+kbd,
+pre,
+samp {
+    font-family: var(--font-mono);
+}
+
+/* 全局公告 Banner 偏移：让首页导航栏固定在 Banner 下方 */
+[data-nav-header] {
+    top: var(--fd-banner-height, 0px) !important;
+    /* Fix: 100vw on mobile includes scrollbar width, causing nav to shift right.
+       Use 100% instead - for position:fixed this equals the viewport width
+       without the scrollbar. */
+    width: 100% !important;
+    /* Keep nav above the docs TOC popover capsule (z:25) so it does not
+       peek out over the fixed navbar when scrolling. Stay below the search
+       dialog (z:1100) and sidebar drawer (z:999). */
+    z-index: 30 !important;
+}
+
+/* Clip the navbar's decorative blur-effect (width:120vw in abweb-navbar CSS module).
+   It lives inside a position:fixed container, so body overflow-x:hidden can't reach it.
+   [data-nav-header] > div targets only the BlurEffect (the sole direct div child);
+   the <header> element is not a div. */
+[data-nav-header] > div {
+    max-width: 100% !important;
+}
+
+/* Align the mobile navbar inner capsule with the hero card (max-w-[95%]).
+   The upstream .inner uses `width: calc(100% - 14px)` under 960px, which leaves
+   only 7px per side and makes the capsule visually overshoot the hero card
+   (~2.5% per side) on wider phones. Clamp it to 95% so both edges line up. */
+@media (max-width: 959px) {
+    [data-nav-header] > header {
+        width: 95% !important;
+    }
+}
+
+[data-nav-header],
+#nd-sidebar,
+#nd-toc,
+#nd-docs-layout [data-toc-popover],
+[data-search-full],
+body>[role="dialog"][data-state]:has(> h2.hidden + div > input) {
+    font-family: var(--font-sans);
+}
+
+html[data-theme-transition="active"],
+html[data-theme-transition="active"] body,
+html[data-theme-transition="active"] *,
+html[data-theme-transition="active"] *::before,
+html[data-theme-transition="active"] *::after {
+    transition-property:
+        color,
+        background-color,
+        border-color,
+        fill,
+        stroke,
+        text-decoration-color !important;
+    transition-duration: 150ms !important;
+    transition-delay: 0s !important;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+
+html[data-theme-transition="active"],
+html[data-theme-transition="active"] body,
+html[data-theme-transition="active"] main,
+html[data-theme-transition="active"] #nd-page,
+html[data-theme-transition="active"] #nd-home-layout,
+html[data-theme-transition="active"] #nd-docs-layout {
+    transition-duration: 220ms !important;
+}
+
+html[data-theme-transition="active"] #nd-page .prose,
+html[data-theme-transition="active"] #nd-page .prose :where(
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        p,
+        li,
+        dt,
+        dd,
+        th,
+        td,
+        blockquote,
+        code,
+        pre,
+        span,
+        strong,
+        em,
+        small,
+        a
+    ) {
+    transition-duration: 220ms !important;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: 220ms;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ab-docs-mobile-nav {
+    /* Match [data-nav-header] z-index (30) so the docs TOC popover
+       capsule (z:25) cannot peek over the fixed navbar when scrolling. */
+    z-index: 30 !important;
+}
+
+@media (min-width: 768px) {
+    .ab-docs-mobile-nav {
+        display: none !important;
+    }
+}
+
+:root {
+    /* 基础主色调 */
+    --color-fd-primary: #1781ff;
+    --color-fd-primary-foreground: #ffffff;
+    --color-fd-accent: rgba(23, 129, 255, 0.08);
+    --color-fd-ring: #1781ff;
+    --fd-nav-height: 64px !important;
+    --color-main-background: var(--color-fd-background);
+    --color-text: var(--color-fd-foreground);
+    --font-family-serif: Georgia, "Times New Roman", "Songti SC", serif;
+    --radius-root: var(--radius-2xl);
+
+    /* Section 主题色变量 */
+    --eternal-color: #10b981;
+    --wearpost-color: #8b5cf6;
+    --simplefetch-color: #0ea5e9;
+    --mingcheng-color: #f59e0b;
+}
+
+.dark {
+    /* 暗黑模式主色调，提高明度增加对比 */
+    --color-fd-primary: #5cafff;
+    --color-fd-primary-foreground: #051327;
+    --color-fd-accent: rgba(92, 175, 255, 0.15);
+    --color-fd-ring: #5cafff;
+
+    /* Section 主题色变量（暗黑模式） */
+    --eternal-color: #34d399;
+    --wearpost-color: #a78bfa;
+    --simplefetch-color: #38bdf8;
+    --mingcheng-color: #fbbf24;
+}
+
+/* Eternal 永昼天气 文档主题色 */
+body.eternal {
+    --color-fd-primary: var(--eternal-color);
+    --color-fd-primary-foreground: #ffffff;
+    --color-fd-accent: color-mix(in srgb, var(--eternal-color) 12%, transparent);
+    --color-fd-ring: var(--eternal-color);
+}
+
+.dark body.eternal {
+    --color-fd-primary-foreground: #022c22;
+    --color-fd-accent: color-mix(in srgb, var(--eternal-color) 15%, transparent);
+}
+
+/* WearPost 腕上信驿 文档主题色 */
+body.wearpost {
+    --color-fd-primary: var(--wearpost-color);
+    --color-fd-primary-foreground: #ffffff;
+    --color-fd-accent: color-mix(in srgb, var(--wearpost-color) 12%, transparent);
+    --color-fd-ring: var(--wearpost-color);
+}
+
+.dark body.wearpost {
+    --color-fd-primary-foreground: #1e1b4b;
+    --color-fd-accent: color-mix(in srgb, var(--wearpost-color) 15%, transparent);
+}
+
+/* SimpleFetch 网络桥接 文档主题色 */
+body.simplefetch {
+    --color-fd-primary: var(--simplefetch-color);
+    --color-fd-primary-foreground: #ffffff;
+    --color-fd-accent: color-mix(in srgb, var(--simplefetch-color) 12%, transparent);
+    --color-fd-ring: var(--simplefetch-color);
+}
+
+.dark body.simplefetch {
+    --color-fd-primary-foreground: #082f49;
+    --color-fd-accent: color-mix(in srgb, var(--simplefetch-color) 15%, transparent);
+}
+
+/* 铭诚 API 文档主题色（mingcheng section） */
+body.mingcheng {
+    --color-fd-primary: var(--mingcheng-color);
+    --color-fd-primary-foreground: #ffffff;
+    --color-fd-accent: color-mix(in srgb, var(--mingcheng-color) 12%, transparent);
+    --color-fd-ring: var(--mingcheng-color);
+}
+
+.dark body.mingcheng {
+    --color-fd-primary-foreground: #451a03;
+    --color-fd-accent: color-mix(in srgb, var(--mingcheng-color) 15%, transparent);
+}
+
+#nd-home-layout {
+    padding-top: var(--fd-nav-height);
+}
+
+#nd-docs-layout {
+    --fd-header-height: var(--fd-nav-height);
+}
+
+/* 富文本内链样式优化 */
+#nd-page .prose :where(a:not([data-card])) {
+  color: var(--color-fd-primary);
+  text-decoration-color: var(--color-fd-accent);
+  text-underline-offset: 4px;
+  transition: text-decoration-color 0.2s ease;
+}
+
+#nd-page .prose :where(a:not([data-card])):hover {
+  text-decoration-color: var(--color-fd-primary);
+}
+
+#nd-page .prose a.bg-fd-primary,
+#nd-page .prose a.bg-fd-primary:hover {
+  color: #ffffff !important;
+  text-decoration-color: transparent !important;
+}
+
+
+/* 侧边栏激活状态优化，去掉生硬的 gradient，改用柔和背景 */
+#nd-sidebar a[data-active="true"] {
+    color: var(--color-fd-primary) !important;
+    background-color: var(--color-fd-accent) !important;
+    font-weight: 500;
+}
+
+header+div:has(aside#nd-sidebar) {
+    display: flex;
+    padding: 8px;
+}
+
+#nd-sidebar:not([data-collapsed="true"]) {
+    width: calc(100% - 16px);
+    max-width: calc(var(--fd-sidebar-width) - 16px);
+    height: calc(100% - 16px);
+    margin: 8px;
+    border: 1px solid var(--color-fd-border) !important;
+    border-radius: 20px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+    inset-inline-start: auto;
+    inset-inline-end: 0;
+}
+
+#nd-sidebar>div {
+    box-sizing: border-box;
+    max-width: 100%;
+}
+
+#nd-sidebar>div.p-4,
+#nd-sidebar>div>div.p-4 {
+    padding: 14px;
+}
+
+#nd-sidebar>div.pb-2 {
+    padding-bottom: 6px;
+}
+
+#nd-sidebar .size-9.shrink-0.empty\:hidden.md\:size-5,
+#nd-sidebar svg.ab-doc-icon {
+    width: 16px;
+    height: 16px;
+}
+
+#nd-sidebar a[data-active="true"]::before {
+    background-color: var(--color-fd-primary) !important;
+    border-radius: 4px;
+}
+
+/* Widen the docs layout container so ultra-wide screens use the space.
+   1920px - sidebar(268px) - toc(256px) leaves ~1396px for the article column. */
+#nd-docs-layout {
+    --fd-layout-width: 1920px;
+}
+
+/* 目录激活状态优化 */
+#nd-toc .data-\[active\=true\]\:text-fd-primary[data-active="true"],
+#nd-toc [data-active="true"] {
+    color: var(--color-fd-primary) !important;
+    font-weight: 500;
+}
+
+#nd-toc .bg-fd-primary,
+#nd-toc [class*="bg-fd-primary"] {
+    background-color: var(--color-fd-primary) !important;
+}
+
+/* 保留你原有的 Hero 动画效果 */
+@keyframes astro-marquee {
+    0% {
+        transform: translate3d(0, 0, 0);
+    }
+
+    100% {
+        transform: translate3d(-50%, 0, 0);
+    }
+}
+
+.pause-anim:hover {
+    animation-play-state: paused;
+}
+
+/* 三行模式下，底部标题从第二行位置下滑入场 */
+.hero-bottom-line {
+    transition:
+        transform 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+        filter 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+#nd-docs-layout [data-sidebar-panel] {
+    top: calc(var(--fd-banner-height, 0px) + 1rem) !important;
+    background:
+        color-mix(in srgb, var(--color-fd-background) 88%, transparent);
+    margin: 16px 12px;
+    z-index: 999;
+    backdrop-filter: blur(12px);
+}
+
+#nd-docs-layout [data-toc-popover] {
+    z-index: 25;
+    padding-top: 10px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+@media not all and (max-width: 1280px) {
+    #nd-docs-layout [data-toc-popover] {
+        visibility: hidden;
+    }
+}
+
+#nd-docs-layout [data-toc-popover]>header {
+    border: 1px solid var(--color-fd-border);
+    background: color-mix(in srgb, var(--color-fd-background) 88%, transparent);
+    backdrop-filter: blur(12px);
+    border-radius: 25px;
+    box-sizing: border-box;
+    margin: 1px 12px;
+    position: relative;
+    max-width: 900px;
+    width: 100%;
+}
+
+#nd-docs-layout [data-sidebar-panel], #nd-docs-layout [data-toc-popover]>header {
+    box-shadow: 0 4px 28px rgba(0, 0, 0, 0.07);
+}
+
+[style="color-scheme: dark;"] #nd-docs-layout [data-sidebar-panel], [style="color-scheme: dark;"] #nd-docs-layout [data-toc-popover]>header {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+#nd-docs-layout [data-toc-popover]>header>button {
+    padding: 24px 22px;
+}
+
+#nd-docs-layout [data-toc-popover]>header>div[data-state="open"] {
+    padding: 0 24px 6px;
+}
+
+#nd-page {
+    margin-top: 24px;
+    /* Override fumadocs' fixed 900px article cap; stay fluid up to 1280px for readability */
+    max-width: min(1280px, 100%);
+}
+
+@media (max-width: 767px) {
+    #nd-docs-layout {
+        --fd-header-height: 56px;
+    }
+
+    #nd-page {
+        margin-top: 72px;
+    }
+
+    #nd-sidebar-mobile {
+        top: var(--fd-docs-row-1, var(--fd-banner-height, 0px));
+        height: calc(100dvh - var(--fd-docs-row-1, var(--fd-banner-height, 0px)));
+        inset-inline-end: auto;
+        inset-inline-start: 0;
+        border-inline-start-width: 0;
+        border-inline-end-width: 1px;
+        --fd-sidebar-drawer-offset: -100%;
+    }
+
+    #nd-sidebar-mobile > div:first-child > div:first-child {
+        flex-direction: row;
+        justify-content: flex-start;
+    }
+
+    /* 取消 iconLinks 的 flex-1，Github 放中间 */
+    #nd-sidebar-mobile > div:first-child > div:first-child > div:first-child {
+        order: 2;
+        flex: none !important;
+    }
+
+    /* ThemeToggle 放最右 */
+    #nd-sidebar-mobile > div:first-child > div:first-child > *:not(:first-child):not(:last-child) {
+        order: 3;
+    }
+
+    /* SidebarTrigger 按钮默认 order: 0，在 row 下最靠左 */
+
+    .hero-typing-wrapper:not(:has([data-ready="true"]))~.hero-bottom-line {
+        transform: translateY(-1.25em);
+        filter: blur(5px);
+        opacity: 0.35;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1280px) {
+    #nd-docs-layout [data-toc-popover] {
+        padding-top: 0;
+        top: 36px;
+    }
+
+    #nd-page {
+        margin-top: 48px;
+    }
+
+    #nd-docs-layout [data-toc-popover] > header{
+        margin: 1px 128px;
+    }
+}
+
+@media (min-width: 1281px) {
+    #nd-docs-layout [data-toc-popover] {
+        top: 64px;
+        padding-top: 0;
+    }
+}
+
+[data-search-full] kbd,
+[class*="desktopLabel"] kbd {
+    justify-content: center;
+    align-items: center;
+    min-width: 20px;
+    max-width: 42px;
+    height: 20px;
+    padding: 1px 3px 0px;
+    font-family: var(--font-sans);
+    display: flex;
+    background:
+        color-mix(in srgb, var(--color-fd-foreground) 10%, transparent);
+    border: none;
+    margin-left: 2px;
+    mix-blend-mode: darken;
+    font-size: 13px;
+    border-radius: 3px;
+    font-weight: normal !important;
+}
+
+[style="color-scheme: dark;"] [data-search-full] kbd,
+[style="color-scheme: dark;"] [class*="desktopLabel"] kbd {
+    mix-blend-mode: hard-light;
+}
+
+/* 修复搜索弹窗等 Radix Dialog 被自定义 nav 遮挡的问题 */
+.fixed.bg-fd-overlay {
+    z-index: 1100 !important;
+}
+
+[role="dialog"] {
+    z-index: 1100 !important;
+}
+
+body>[role="dialog"][data-state]:has(> h2.hidden + div > input):has(> div[data-empty]) {
+    border-color: var(--color-fd-border);
+    background: var(--color-fd-background);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.24);
+    border-radius: calc(66px / 2);
+}
+
+body>[role="dialog"][data-state]:has(> h2.hidden + div > input):has(> div[data-empty])>div:first-of-type {
+    padding: 12px 18px;
+    background: var(--color-fd-border);
+    border-radius: calc(62px / 2);
+    border: 4px var(--color-fd-background) solid;
+}
+
+body>[role="dialog"][data-state]:has(> h2.hidden + div > input):has(> div[data-empty])>div:first-of-type input {
+    font-size: 16px;
+    line-height: 24px;
+    font-family: var(--font-sans);
+}
+
+body>[role="dialog"][data-state]:has(> h2.hidden + div > input):has(> div[data-empty]) button[aria-selected] {
+    border-radius: 14px;
+    overflow: visible;
+}
+
+body>[role="dialog"][data-state]:has(> h2.hidden + div > input):has(> div[data-empty])>div[data-empty]>div {
+    padding-bottom: 54px;
+}
+
+body>[role="dialog"][data-state]:has(> h2.hidden + div > input):has(> div[data-empty="false"])>div[data-empty="false"]>div>button:last-child::after {
+    content: "没有更多搜索结果了";
+    display: block;
+    margin-top: 12px;
+    padding-top: 12px;
+    color: var(--color-fd-muted-foreground);
+    font-size: 14px;
+    line-height: 20px;
+    text-align: center;
+    pointer-events: none;
+    position: absolute;
+}
+
+body>[role="dialog"][data-state]:has(> h2.hidden + div > input):has(> div[data-empty])>div:first-of-type>input+button {
+  border-radius: 999px;
+  font-family: var(--font-sans);
+  margin-right: -4px;
+  padding: 6px 9px 5px;
+  border-width: 2px;
+}
+
+/* ===== Details 折叠块美化 ===== */
+.prose details {
+  border: 1px solid color-mix(in srgb, var(--color-fd-border) 60%, transparent);
+  border-radius: 16px;
+  padding: 0;
+  margin: 1.5rem 0;
+  background: var(--color-fd-background);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.prose details:hover {
+  border-color: color-mix(in srgb, var(--color-fd-primary) 50%, transparent);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.dark .prose details:hover {
+  border-color: color-mix(in srgb, var(--color-fd-primary) 50%, transparent);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.prose details summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 16px 24px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  user-select: none;
+  transition: background-color 0.2s ease;
+}
+
+.prose details summary:hover {
+  background-color: var(--color-fd-accent);
+}
+
+.prose details summary::-webkit-details-marker {
+  display: none;
+}
+
+/* 展开/收缩按钮 - 圆形按钮样式，使用 Phosphor Icons 加减号 */
+.prose details summary::after {
+  content: "";
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--color-fd-primary) 10%, transparent);
+  flex-shrink: 0;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 256 256' fill='%231781ff' stroke='%231781ff' stroke-width='8'%3E%3Cpath d='M224 128a8 8 0 0 1-8 8h-80v80a8 8 0 0 1-16 0v-80H40a8 8 0 0 1 0-16h80V40a8 8 0 0 1 16 0v80h80a8 8 0 0 1 8 8Z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 16px;
+}
+
+.dark .prose details summary::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 256 256' fill='%235cafff' stroke='%235cafff' stroke-width='8'%3E%3Cpath d='M224 128a8 8 0 0 1-8 8h-80v80a8 8 0 0 1-16 0v-80H40a8 8 0 0 1 0-16h80V40a8 8 0 0 1 16 0v80h80a8 8 0 0 1 8 8Z'/%3E%3C/svg%3E");
+}
+
+.prose details summary:hover::after {
+  background: var(--color-fd-primary);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 256 256' fill='%23ffffff' stroke='%23ffffff' stroke-width='8'%3E%3Cpath d='M224 128a8 8 0 0 1-8 8h-80v80a8 8 0 0 1-16 0v-80H40a8 8 0 0 1 0-16h80V40a8 8 0 0 1 16 0v80h80a8 8 0 0 1 8 8Z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 16px;
+}
+
+.prose details[open] summary::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 256 256' fill='%231781ff' stroke='%231781ff' stroke-width='8'%3E%3Cpath d='M224 128a8 8 0 0 1-8 8H40a8 8 0 0 1 0-16h176a8 8 0 0 1 8 8Z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 16px;
+  box-shadow: none;
+}
+
+.dark .prose details[open] summary::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 256 256' fill='%235cafff' stroke='%235cafff' stroke-width='8'%3E%3Cpath d='M224 128a8 8 0 0 1-8 8H40a8 8 0 0 1 0-16h176a8 8 0 0 1 8 8Z'/%3E%3C/svg%3E");
+}
+
+.prose details[open] summary:hover::after {
+  background: var(--color-fd-primary);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 256 256' fill='%23ffffff' stroke='%23ffffff' stroke-width='8'%3E%3Cpath d='M224 128a8 8 0 0 1-8 8H40a8 8 0 0 1 0-16h176a8 8 0 0 1 8 8Z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 16px;
+  box-shadow: none;
+}
+
+.prose details[open] summary {
+  box-shadow: 0 1px 0 var(--color-fd-border);
+}
+
+/* 内容区域 */
+.prose details > :not(summary) {
+  padding-left: 24px;
+  padding-right: 24px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.prose details > :not(summary) + :not(summary) {
+  margin-top: 0.5em;
+}
+
+.prose details > :not(summary):last-child {
+  padding-bottom: 16px;
+}
+
+/* 修复 details 内容区中 h 标题和列表左侧对齐 */
+.prose details > :not(summary) h2,
+.prose details > :not(summary) h3,
+.prose details > :not(summary) h4 {
+  padding-left: 1rem;
+}
+
+.prose details[open] > :not(summary) {
+  animation: details-fade-in 0.3s ease;
+}
+
+@keyframes details-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

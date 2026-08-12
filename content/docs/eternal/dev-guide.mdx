@@ -1,0 +1,95 @@
+---
+title: 开发指南
+icon: Code
+description: 永昼天气的开发者文档，适用于 LUA 表盘开发和二次开发
+---
+
+import {
+  FolderIcon,
+  CodeIcon,
+} from "@phosphor-icons/react/dist/ssr";
+
+本应用支持开发者为其开发 LUA 表盘，也可以依照核心 JS 直接二次开发其他天气应用。
+
+## 应用基本信息
+
+| 项目 | 值 |
+|------|-----|
+| 应用包名 | `moe.mcns.Eternal` |
+| 版本代号 | `Next` |
+| 应用版本 | `260618` |
+
+## 数据存储结构
+
+### 城市列表文件
+
+**存储位置：**
+```
+internal://files/weather/citylist.json
+```
+
+**存储格式：** 使用 MingChengAPI `/api/3f/getCity` 返回格式
+
+详见 [获取城市信息](/docs/mingcheng-api/dev#getCity)
+
+### 城市天气信息
+
+**存储位置：**
+```
+internal://files/weather/weatherdata/{lat}_{lon}/daily.json
+internal://files/weather/weatherdata/{lat}_{lon}/hourly_{Date}.json
+```
+
+<Callout>
+请替换 `{lat}` 为城市纬度，`{lon}` 为城市经度，`{Date}` 为日期（如 `2026-01-01`）。lat 和 lon 数据均在 citylist 中有存储。
+</Callout>
+
+**存储格式：** 使用 MingChengAPI `/api/3f/getWeather` 返回格式
+
+- `daily.json` - 存储日级天气数据（不含 hourly 详情）
+- `hourly_{Date}.json` - 存储对应日期的小时级天气数据
+
+详见 [获取天气信息](/docs/mingcheng-api/dev#getWeather)
+
+### 城市预警信息
+
+**存储位置：**
+```
+internal://files/weather/weatherdata/{lat}_{lon}/warn.json
+```
+
+**存储格式：** 使用 MingChengAPI `/api/3f/getWarn` 返回格式
+
+详见 [获取天气预警](/docs/mingcheng-api/dev#getWarn)
+
+### 分钟级降水信息
+
+**存储位置：**
+```
+internal://files/weather/weatherdata/{lat}_{lon}/minutely.json
+```
+
+**存储格式：** 使用 MingChengAPI `/api/3f/getMinutely` 返回格式
+
+详见 [获取分钟级降水](/docs/mingcheng-api/dev#getMinutely)
+
+### 应用设置信息
+
+**存储位置：**
+```
+internal://files/weather/settings.json
+```
+
+**存储格式：** JSON 对象，包含用户设置项
+
+## 开发资源
+
+<Cards>
+  <Card
+    icon={<CodeIcon className="text-purple-400" weight="duotone" />}
+    title="铭诚API 文档"
+    href="/docs/mingcheng-api"
+  >
+    了解数据接口格式
+  </Card>
+</Cards>

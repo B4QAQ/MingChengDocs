@@ -1,0 +1,117 @@
+---
+title: 使用指南
+icon: BookOpen
+description: 腕上信驿使用教程与功能说明
+---
+
+# 使用指南
+
+欢迎使用腕上信驿（WearPost），一款专为 Xiaomi Vela 手表设计的邮件客户端应用。本指南将帮助您快速上手并充分利用所有功能。
+
+## 快速开始
+
+### 系统要求
+
+- 网络连接（小米运动健康连接 或eSIM）
+- 有效的邮箱账户
+
+### 初始设置
+
+1. **启动应用** - 打开腕上信驿
+2. **进行联网激活验证** - 将引导您进行联网支付验证
+
+## 邮箱账户配置
+
+### 1. 登录邮箱账户
+
+腕上信驿支持所有标准 IMAP/SMTP 邮箱服务，包括但不限于：
+
+| 邮箱服务商 | IMAP 服务器 | SMTP 服务器 |
+|-----------|-------------|-------------|
+| QQ 邮箱 | imap.qq.com | smtp.qq.com |
+| 163 邮箱 | imap.163.com | smtp.163.com |
+| Gmail | imap.gmail.com | smtp.gmail.com |
+| Outlook | outlook.office365.com | smtp.office365.com |
+
+<Callout type="info">
+上述邮件服务商默认 IMAP 端口为 993 (SSL)，SMTP 端口为 465 (SSL) 或 587 (STARTTLS)。
+</Callout>
+
+<Callout type="warn">
+如果是自建的邮件服务，请使用支持 SORT 的架构获得更好的体验，不然可能会导致获取邮件速度慢或超时（仅限邮件过多时）。
+</Callout>
+
+### 2. 找到服务开启入口
+
+<Callout type="warn">
+建议使用 `电脑版` / `标准版` 网页，以避免部分入口不显示。
+
+- 手机端推荐使用 Via 浏览器（右下角 `三条杠` → `电脑模式`）
+- 电脑端请使用 Chromium 内核的现代浏览器（Edge / Chrome）
+</Callout>
+
+这里以 QQ 邮箱为例，各家邮箱入口相似：
+
+| 邮箱服务商 | 开启入口 |
+|-----------|----------|
+| QQ 邮箱 | 点击顶栏右上角 `账户卡片` → `账号与安全` → `安全设置` → `POP3/IMAP/SMTP/Exchange/CardDAV 服务` |
+| 163 邮箱 | 点击 `设置` → `邮箱安全设置` → `POP3/SMTP/IMAP` |
+| Gmail | 开启二次验证 (2FA)：https://myaccount.google.com/signinoptions/twosv → 创建应用专用密码：https://myaccount.google.com/apppasswords |
+| Outlook | 点击顶栏右上角 `齿轮图标` → `邮件` → `同步电子邮件` → `POP和IMAP` |
+
+<ImageZoom
+  src="/assets/images/docs/WearPost/QQ-1.png"
+  alt="QQ邮箱入口位置"
+/>
+<ImageZoom
+  src="/assets/images/docs/WearPost/QQ-2.png"
+  alt="开启IMAP服务"
+/>
+<ImageZoom
+  src="/assets/images/docs/WearPost/QQ-3.png"
+  alt="生成授权码"
+/>
+<ImageZoom
+  src="/assets/images/docs/WearPost/QQ-4.png"
+  alt="应用内配置界面"
+/>
+
+<Callout type="info">
+自 2025 年 1 月起，"启用 IMAP" 和 "停用 IMAP" 选项将无法再使用。Gmail 中的 IMAP 访问功能始终处于启用状态。
+</Callout>
+
+### 3. 开启服务，获取密码（授权码）
+
+| 邮箱服务商 | 获取方式 |
+|-----------|----------|
+| QQ 邮箱 | 点击生成授权码即可 |
+| 163 邮箱 | 下滑找到 `授权密码管理` → 点击 `新增授权密码` |
+| Gmail | 上文提到的应用专用密码即为密码 |
+| Outlook | 默认情况是 Microsoft 账户密码，但可能需要为其申请专用密码，详见：https://support.microsoft.com/zh-CN/Outlook/pop-imap-and-smtp-settings-for-outlook-com |
+
+### 4. 输入进应用，大功告成！
+
+在应用中填写以下信息：
+
+| 字段 | 说明 |
+|------|------|
+| 邮箱地址 | 你服务商显示的邮箱地址 |
+| 显示名称 | 你发件时 / 应用内显示的名称 |
+| 密码 / 授权码 | 即步骤 3 获取到的字符串 |
+| IMAP 地址 | 查找上文表格或在服务商页面寻找（通常在 `提示` 或 `配置方法` 中） |
+| IMAP 端口 | 查找上文表格或在服务商页面寻找（通常在 `提示` 或 `配置方法` 中） |
+| SMTP 地址 | 查找上文表格或在服务商页面寻找（通常在 `提示` 或 `配置方法` 中） |
+| SMTP 端口 | 查找上文表格或在服务商页面寻找（通常在 `提示` 或 `配置方法` 中） |
+
+<Callout type="warn">
+请一定点击 **[测试连接]** 确保连接正常！
+</Callout>
+
+## 技术支持
+
+如果您在使用过程中遇到问题，可以通过以下方式获取帮助：
+
+- **QQ群：** [点击加入](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=MgMfZ00c1zREHBx1invvJJBlLFYEtOe6&authKey=%2FhpkPREDCC6gtaKbOgE8agwW5Mg2yWF9hmlGOV7Esbog2uwH%2Bo0s%2FjNp6moLb1xp&noverify=0&group_code=1076096725)
+- **邮箱：** 525148989@qq.com
+
+感谢您使用腕上信驿！

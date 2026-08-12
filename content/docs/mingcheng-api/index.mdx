@@ -1,0 +1,81 @@
+---
+title: 快速开始
+icon: Rocket
+description: 了解 MingChengAPI 的基础概念与快速接入方法
+---
+
+import {
+  RocketIcon,
+  KeyIcon,
+  CloudIcon,
+  EnvelopeIcon,
+  MegaphoneIcon,
+  CreditCardIcon,
+} from "@phosphor-icons/react/dist/ssr";
+
+# 简介
+
+MingChengAPI 是一个高自由度、开放的第三方快应用 API 服务，为开发者提供设备验证、天气数据、邮件服务、公告系统等功能。  
+其具有可拓展性强，开发者友好，稳定安全等特点
+
+## API基础信息
+
+| 项目 | 值 |
+|------|-----|
+| 基础路径 | `https://api.b4qaq.cn/api/v2` |
+| 认证方式 | APIKey或账密 |
+| 统一响应格式 | `{ status: 200, result: ..., message: "..." }` |
+<Callout type="info">
+message可选
+</Callout>
+## 权限等级
+
+```
+Verify(设备验证) < User(普通用户) < Dev(开发者) < ROOT(超级管理员)
+```
+<Callout type="warn">
+Service模块功能仅Verify权限可用
+</Callout>
+<Callout type="warn">
+内部管理员API并不在本文档范围内
+</Callout>
+
+## 功能模块
+
+<Cards>
+  <Card
+    icon={<KeyIcon className="text-blue-400" weight="duotone" />}
+    title="设备验证"
+    href="/docs/mingcheng-api/base"
+  >
+    设备验证、获取设备信息等基础功能
+  </Card>
+  <Card
+    icon={<CloudIcon className="text-green-400" weight="duotone" />}
+    title="和风天气"
+    href="/docs/mingcheng-api/qweather"
+  >
+    天气预报、预警、城市信息、天气指数等
+  </Card>
+  <Card
+    icon={<MegaphoneIcon className="text-orange-400" weight="duotone" />}
+    title="公告系统"
+    href="/docs/mingcheng-api/notice"
+  >
+    获取系统和应用公告
+  </Card>
+  <Card
+    icon={<EnvelopeIcon className="text-purple-400" weight="duotone" />}
+    title="邮件服务"
+    href="/docs/mingcheng-api/mail"
+  >
+    邮箱概览、邮件列表、发送邮件等
+  </Card>
+  <Card
+    icon={<CreditCardIcon className="text-pink-400" weight="duotone" />}
+    title="支付系统"
+    href="/docs/mingcheng-api/payment"
+  >
+    支付状态查询与回调处理
+  </Card>
+</Cards>

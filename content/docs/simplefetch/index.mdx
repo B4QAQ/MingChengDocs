@@ -1,0 +1,108 @@
+---
+title: 从此开始
+icon: Router
+description: SimpleFetch - AstroBox 网络桥接插件，代理快应用的 HTTP / SSE 请求
+---
+
+import {
+  PlugsConnectedIcon,
+  HeartbeatIcon,
+  StackIcon,
+  BroadcastIcon,
+  ShieldCheckIcon,
+  BookOpenIcon,
+  ArrowsLeftRightIcon,
+} from "@phosphor-icons/react/dist/ssr";
+
+**SimpleFetch** 是一款运行在 AstroBox 上的网络桥接插件。部分小米手环 / 手表设备本身不支持 `@system.fetch`，无法直接联网；SimpleFetch 在手机端充当「网络代理」，让接入协议的快应用也能自由发起 HTTP / SSE 请求。
+
+## 它解决什么问题
+
+在 Vela 快应用生态中，不少设备（如小米手环 8/9/10 Pro、Redmi Watch 4 等）由于系统限制**不支持 `fetch`**，快应用无法直接访问网络。SimpleFetch 通过 AstroBox 的互联通道（interconnect）在手机与手表之间建立一座桥：
+
+```
+快应用  ──SF_REQUEST──▶  SimpleFetch 插件  ──真实 HTTP──▶  服务器
+   ▲                                                        │
+   └──────────────── SF_RESPONSE ◀──────────────────────────┘
+```
+
+快应用只需接入 SimpleFetch 协议，无需关心手机端如何执行请求；握手成功后，所有 `fetch` 请求会自动改走桥接通道。
+
+## 核心特性
+
+<Cards>
+  <Card
+    icon={<PlugsConnectedIcon className="text-blue-400" weight="duotone" />}
+    title="任意快应用可用"
+    href="./protocol"
+  >
+    不绑定特定包名。任意接入 SimpleFetch 协议的快应用，按包名授权后即可联网。
+  </Card>
+  <Card
+    icon={<ArrowsLeftRightIcon className="text-green-400" weight="duotone" />}
+    title="双向握手"
+    href="./protocol#1-握手"
+  >
+    插件或快应用任一方都可主动发起握手，握手成功后快应用自动进入桥接模式。
+  </Card>
+  <Card
+    icon={<HeartbeatIcon className="text-red-400" weight="duotone" />}
+    title="心跳保活"
+    href="./protocol#2-心跳"
+  >
+    快应用每 10 秒发送一次心跳，插件秒回；长时间未收到心跳则主动关闭桥接。
+  </Card>
+  <Card
+    icon={<StackIcon className="text-purple-400" weight="duotone" />}
+    title="智能分片"
+    href="./protocol#4-普通请求"
+  >
+    小响应单条直发；超过阈值自动整体 base64 编码后分片回传，快应用拼接解码即可。
+  </Card>
+  <Card
+    icon={<BroadcastIcon className="text-cyan-400" weight="duotone" />}
+    title="SSE 流式转发"
+    href="./protocol#5-sse-流式请求"
+  >
+    逐事件转发为 SF_SSE_EVENT，支持服务端结束、出错以及快应用主动关闭。
+  </Card>
+  <Card
+    icon={<ShieldCheckIcon className="text-amber-400" weight="duotone" />}
+    title="贴心容错"
+    href="./protocol#44-错误响应"
+  >
+    自动补全 Content-Type、gzip/deflate 自动解压，网络错误以中文描述返回。
+  </Card>
+</Cards>
+
+## 工作流程
+
+1. 用户在 AstroBox 连接页点击 `[连接]`（或快应用在「偏好设置 → 连接桥接网络」主动发起）；
+2. 握手成功后，快应用设置 `global.NetworkStatus = 'bridge'`，所有 `fetch` 请求改走互联通道；
+3. 插件收到 `SF_REQUEST` 后执行真实 HTTP 请求，并将结果按 `SF_RESPONSE` 格式回传；
+4. 心跳维持连接，断开时自动回退网络状态。
+
+手机端配套的快应用示例可参考 [ResonaUI](https://github.com/B4QAQ/ResonaUI)。
+
+## 快速导航
+
+<Cards>
+  <Card
+    icon={<BookOpenIcon className="text-blue-400" weight="duotone" />}
+    title="通信协议"
+    href="./protocol"
+  >
+    查看完整的 SimpleFetch 通信协议规范，包含握手、心跳、请求、分片、SSE 等全部消息定义
+  </Card>
+</Cards>
+
+## 技术栈
+
+- **Rust** + `wit-bindgen` —— Component Model 异步绑定
+- **WASI HTTP** —— 真实 HTTP / SSE 请求执行
+- **flate2** —— gzip / deflate 自动解压
+- **base64** —— 大响应体编码分片
+
+## 许可证
+
+本项目采用 [GNU AGPL v3.0](https://www.gnu.org/licenses/agpl-3.0.html) 许可证。
