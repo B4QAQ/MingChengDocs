@@ -6,16 +6,15 @@ description: 第三方快应用如何接入 SimpleFetch 协议，通过手机桥
 
 import {
   PlugsConnectedIcon,
-  HeartbeatIcon,
-  ShuffleIcon,
-  BroadcastIcon,
-  LinkBreakIcon,
-  TerminalWindowIcon,
+  GitForkIcon,
+  StackIcon,
+  RocketLaunchIcon,
+  BookOpenIcon,
 } from "@phosphor-icons/react/dist/ssr";
 
-本指南面向**快应用开发者**：如果你开发的快应用运行在不支持 `@system.fetch` 的设备上（如部分小米手环 / 手表），只需接入 SimpleFetch 协议，就能让快应用通过手机端的 SimpleFetch 插件自由联网。
+本指南面向**快应用开发者**，将指导你把自己的快应用接入 SimpleFetch 以实现联网。
 
-通信协议的字段级定义见 [通信协议](./protocol)，本文给出**接入步骤与可直接参考的代码实现**。完整的真实示例可参考 [ResonaUI](https://github.com/B4QAQ/ResonaUI)。
+通信协议的字段级定义见 [通信协议](./protocol)，本文仅介绍**如何接入** SimpleFetch。
 
 ## 它是怎么工作的
 
@@ -33,381 +32,322 @@ import {
 你不需要关心手机端如何发请求——**只要正确收发 `SF_*` 消息**即可。
 </Callout>
 
-## 接入前提
+## 正在观望？
 
-1. 用户已在 AstroBox 上安装并连接 SimpleFetch 插件（见 [安装与使用](./usage)）；
-2. 快应用已声明互联相关权限，且**包名**与手机端授权的一致（参考实现 ResonaUI 使用 `moe.mcns.ResonaUI`）；
-3. 建议同时支持「插件主动握手」和「快应用主动握手」两条路径，提升连接成功率。
+如果你还没开始开发快应用，[ResonaUI](https://github.com/B4QAQ/ResonaUI) 是一个很好的起点：它不仅集成了 SimpleFetch，自带的 AI 提示词也能降低 AI 辅助开发的门槛、提高应用质量。
 
-## 接入步骤总览
+## 正式接入
+
+如果你已经有自己的快应用，接入 SimpleFetch 并不难。针对以下两种情况，我们提供了对应的教程：
+
+- **已有通信协议实现**：只需为 SimpleFetch 开一个分支处理其消息；
+- **还没有互联通信部分**：直接复用 ResonaUI 的互联模块即可。
 
 <Cards>
   <Card
-    icon={<PlugsConnectedIcon className="text-blue-400" weight="duotone" />}
-    title="1. 建立连接与握手"
-    href="#1-建立连接与握手"
+    icon={<GitForkIcon className="text-blue-400" weight="duotone" />}
+    title="已有通信协议"
+    href="#已有通信协议接入"
   >
-    监听互联消息，收发 SF_HANDSHAKE / SF_HANDSHAKE_ACK，成功后进入桥接模式。
+    你已经实现了互联通信，想在现有架构上接入 SimpleFetch
   </Card>
   <Card
-    icon={<HeartbeatIcon className="text-red-400" weight="duotone" />}
-    title="2. 心跳保活"
-    href="#2-心跳保活"
+    icon={<StackIcon className="text-emerald-400" weight="duotone" />}
+    title="从零接入"
+    href="#无通信协议接入"
   >
-    每 10 秒发 SF_PING，5 秒内未收到 SF_PONG 则断开重连。
-  </Card>
-  <Card
-    icon={<ShuffleIcon className="text-purple-400" weight="duotone" />}
-    title="3. 发送请求 & 拼接分片"
-    href="#3-发送普通请求"
-  >
-    发 SF_REQUEST，按 totalChunks 决定直接用还是拼接 base64 分片后 atob。
-  </Card>
-  <Card
-    icon={<BroadcastIcon className="text-cyan-400" weight="duotone" />}
-    title="4. SSE 流式请求"
-    href="#4-sse-流式请求"
-  >
-    sse:true 后监听 SF_SSE_EVENT / END / ERROR，可主动 SF_CLOSE。
-  </Card>
-  <Card
-    icon={<LinkBreakIcon className="text-amber-400" weight="duotone" />}
-    title="5. 断开与清理"
-    href="#5-断开与清理"
-  >
-    收到 SF_CLOSE_BRIDGE 或互联断开时，拒绝待处理请求并回退网络状态。
+    还没有互联通信模块，直接复用 ResonaUI 的实现
   </Card>
 </Cards>
 
 ---
 
-## 1. 建立连接与握手
+## 已有通信协议接入
 
-握手**任一方都可发起**，逻辑相同：
+如果你已经有自己的通信协议实现，可以为 SimpleFetch 单独开一个分支来处理它的消息。
 
-- 快应用**收到** `SF_HANDSHAKE` → 回复 `SF_HANDSHAKE_ACK`，然后进入桥接模式；
-- 快应用**主动发起** → 发送 `SF_HANDSHAKE`，收到 `SF_HANDSHAKE_ACK` 后进入桥接模式。
+### 1. 获取 `simpleFetch.js` 源码
 
-进入桥接模式时设置：
+任选一种方式：
 
-```js
-global.NetworkStatus = "bridge"; // 让业务层知道正走桥接
-global.fetchAva = true;
-startHeartbeat();               // 启动 10 秒心跳
+1. 直接从 GitHub 下载：[simpleFetch.js](https://github.com/B4QAQ/ResonaUI/blob/main/src/common/js/simpleFetch.js)
+2. 通过 git 克隆后提取：
+
+```bash
+git clone https://github.com/B4QAQ/ResonaUI
 ```
 
-<Callout type="warn">
-由快应用主动发起握手需要满足：设备亮屏 / 插件在前台，并且本次 AstroBox 启动后插件曾至少主动握手过一次（详见 [安装与使用 → 连接快应用](./usage#连接快应用)）。最稳妥的做法是**同时处理两种握手**。
-</Callout>
+然后在 `src/common/js/simpleFetch.js` 找到该文件。
 
-## 2. 心跳保活
+### 2. 根据实际情况修改依赖
 
-握手成功后，快应用每 **10 秒**发送一次 `SF_PING`；发出后 **5 秒**内未收到 `SF_PONG` 即判定连接断开，执行清理。
+`simpleFetch.js` 依赖 ResonaUI 的 `sendInterconnectData` 与 `getDeviceInfo`，二者都有替换方案。
 
-```js
-// 快应用发送
-{ type: "SF_PING", data: { ts: Date.now() } }
-// 手机回复
-{ type: "SF_PONG", status: "OK", data: { ts: 1700000000000 } }
+#### `sendInterconnectData` —— 对接你的数据发送函数
+
+```javascript
+/**
+ * 发送数据到手机 App
+ * @param {Object} data 要发送的数据对象
+ * @return {Promise<boolean>} 发送结果
+ */
+export function sendInterconnectData(data) {
+  return new Promise((resolve) => {
+    if (!global.interconnectInstance) {
+      console.log('[设备通信] 发送失败: 通信实例未初始化')
+      global.uiAdm.MessageBox('发送数据失败:未初始化')
+      resolve(false)
+      return
+    }
+
+    global.interconnectInstance.send({
+      data: data,
+      success: () => {
+        console.log('[设备通信] 发送成功:', JSON.stringify(data))
+        resolve(true)
+      },
+      fail: (data, code) => {
+        console.log('[设备通信] 发送失败, code:', code, 'msg:', data)
+        global.uiAdm.MessageBox(`[E${code}]发送数据失败:` + data)
+        resolve(false)
+      }
+    })
+  })
+}
+```
+
+将上文的 `global.interconnectInstance` 替换为你自己通信协议的实例即可。
+
+#### `getDeviceInfo` —— 网络状态刷新
+
+```javascript
+/**
+ * 获取网络信息
+ * @return {Promise<Object>} 网络信息对象
+ */
+export async function getDeviceInfo() {
+  const info = {}
+  try {
+    await new Promise((resolve) => {
+      network.getType({
+        success: (data) => {
+          if (global.NetworkStatus === 'bridge') {
+            info.type = 'bridge'
+            global.fetchAva = true
+          } else {
+            Object.assign(info, data)
+          }
+          resolve()
+        },
+        fail: () => resolve()
+      })
+    })
+
+    Object.assign(info, app.getInfo())
+    if (global.NetworkStatus !== 'bridge') {
+      global.fetchAva = !!app.canIUse('@system.fetch')
+    }
+    global.NetworkStatus = info.type
+  } catch (e) {
+    console.error('[X] 获取设备信息失败:', e)
+  }
+
+  return info
+}
 ```
 
 <Callout>
-`ts` 原样回传即可，快应用实际不校验其值——收到任意 `SF_PONG` 就视为存活。
+此处对 ResonaUI 的实现做了简写。理论上，`getDeviceInfo` 只要能正确给 `global.NetworkStatus` 与 `global.fetchAva` 赋值即可。
 </Callout>
+<details>
+<summary>进阶移植：关于`global.uiAdm.MessageBox</summary>
 
-## 3. 发送普通请求
+代码里出现的 `global.uiAdm.MessageBox` 只是对 `prompt.showToast` 的简单封装，具体实现如下，按需替换成你自己的提示组件即可：
 
-发送 `SF_REQUEST`（`sse: false`）：
+```javascript
+/**
+ * 显示提示框
+ */
+export function MessageBox(text = '未指定文本', time = 1500) {
+  prompt.showToast({ message: text, duration: time })
+}
+```
+</details>
+### 3. 在实际请求中使用
 
-```json
-{
-  "type": "SF_REQUEST",
-  "data": {
-    "id": "sf_1",
-    "url": "https://api.example.com/data",
-    "method": "POST",
-    "headers": { "Content-Type": "application/json" },
-    "body": "{\"key\":\"value\"}",
-    "sse": false,
-    "timeout": 10000
+完成上面两步后，就可以在你的 fetch 封装里使用 SimpleFetch 了：
+
+```javascript
+import fetch from '@system.fetch'
+import * as simpleFetch from './simpleFetch.js'
+
+/**
+ * 发送网络请求
+ * @param {string} url 请求地址
+ * @return {Object} 请求结果
+ */
+export async function sendFetch(url) {
+  // 检查网络状态
+  if (global.NetworkStatus === 'none') {
+    console.log('[X] 无网络连接')
+    return { status: 503, result: '无网络连接' }
+  }
+
+  const requestConfig = { timeout: 10000 }
+  requestConfig.url = encodeURI(url)
+  requestConfig.method = 'GET'
+
+  // 桥接模式走 SimpleFetch，否则走原生 fetch
+  const fetcher = global.NetworkStatus === 'bridge' ? simpleFetch : fetch
+
+  try {
+    const response = await fetcher.fetch(requestConfig)
+    return response.data.data
+  } catch (e) {
+    console.log('[X] 请求异常:', e)
   }
 }
 ```
 
-| 字段 | 说明 |
-|------|------|
-| `id` | 请求唯一 ID，响应原样回传，靠它关联请求 |
-| `url` | 完整地址（建议 `encodeURI`） |
-| `method` | 大写 HTTP 方法 |
-| `headers` | 请求头对象，无则 `{}` |
-| `body` | 请求体**字符串**（对象先 `JSON.stringify`），GET 等无 body 时为 `null` |
-| `timeout` | 超时时间(ms)，手机端也以此作为 HTTP 超时 |
-
-### 处理响应：按 `totalChunks` 拼接
-
-收到 `SF_RESPONSE` 后，**只看 `data.totalChunks`**：
-
-- `totalChunks` 为 `0`（或缺失）→ `body` 是**原始字符串**，直接用；
-- `totalChunks > 0` → 所有分片的 `body` 拼起来是一整段 **base64**，按 `chunk`（从 1 开始）顺序拼好后整体 `atob` 解码。
-
-<Callout type="warn">
-分片是「先对完整响应体做一次 base64，再切成 N 段」，**不是每段单独 base64**。必须按序收齐，第 1 片带 `statusCode` / `headers`。
+<Callout>
+设计上，SimpleFetch 的 `fetch` 函数返回值与 `@system.fetch` **完全一致**，因此可以直接替换系统 fetch 使用。
 </Callout>
-
-随后按响应头 `Content-Type` 决定是否 `JSON.parse`（含 `application/json` 就解析，失败回退字符串），与原生 `@system.fetch` 行为一致。
-
-### 错误响应
-
-请求级失败时 `status` 是中文错误原因，`data.statusCode` 为 `0`：
-
-```json
-{ "type": "SF_RESPONSE", "status": "请求超时", "data": { "id": "sf_1", "statusCode": 0 } }
-```
-
-把该请求 reject 为 `{ code: 0, data: "请求超时" }` 即可。常见原因：`请求超时`、`网络不可达`、`DNS解析失败`、`连接被拒绝`。
-
-## 4. SSE 流式请求
-
-把 `SF_REQUEST.data.sse` 设为 `true`。SSE 请求**不会**收到 `SF_RESPONSE`，只收 `SF_SSE_*`：
-
-- `SF_SSE_EVENT`：一条事件，`data.event`（默认 `"message"`）、`data.data`；
-- `SF_SSE_END`：服务端正常结束流；
-- `SF_SSE_ERROR`：流出错，`status` 是错误原因；
-- 快应用想主动停止时发送 `SF_CLOSE`：`{ type: "SF_CLOSE", data: { id } }`。
-
-<Callout type="warn">
-发出 SSE 请求后会启动一个连接超时（即请求的 `timeout`，默认 30s）。手机端必须在该时间内发来**第一个** `SF_SSE_EVENT`，否则判定 `SSE连接超时`；首个事件到达后不再计时。
-</Callout>
-
-## 5. 断开与清理
-
-以下任一情况都要执行清理：
-
-1. 收到手机端的 `SF_CLOSE_BRIDGE`（回复 `SF_CLOSE_BRIDGE_ACK`）；
-2. 互联通道本身断开（`onclose`）——**此时无需手机端再发关闭消息**；
-3. 心跳超时。
-
-清理动作：停止心跳 → reject 所有待处理请求为「桥接连接断开」→ 通知所有 SSE 出错 → 置 `global.NetworkStatus = "none"` → 调用 `getDeviceInfo()` 刷新网络状态。
 
 ---
 
-## 参考实现
+## 无通信协议接入
 
-下面是一个与传输层解耦的桥接模块。把 `transport.send` / `transport.onMessage` 接到你所用的互联 API 即可（ResonaUI 中有完整的互联接线示例）。
+如果你还没有通信协议，接入 SimpleFetch 更加简单——直接复用 ResonaUI 的互联模块即可。
 
-```js
-// simplefetch-bridge.js
-let transport = null;       // { send(obj), onMessage(cb) }
-let heartbeatTimer = null;
-let pingTimeoutTimer = null;
-let connected = false;
+### 1. 克隆 ResonaUI
 
-const pending = new Map();  // id -> { resolve, reject, timeout }
-const sseChunks = new Map(); // id -> { chunks: [], total: 0 }
-const sseHandlers = new Map(); // id -> { onEvent, onEnd, onError }
+```bash
+git clone https://github.com/B4QAQ/ResonaUI
+```
 
-function send(type, data = {}, status) {
-  const msg = { type, data };
-  if (status !== undefined) msg.status = status;
-  transport.send(msg);
-}
+### 2. 粘贴相关文件
 
-// ===== 握手 =====
-function enterBridgeMode() {
-  connected = true;
-  global.NetworkStatus = "bridge";
-  global.fetchAva = true;
-  startHeartbeat();
-}
+在 ResonaUI 中找到 `simpleFetch.js` 和 `interconnect.js`，处理好目录关系（图省事可以把整个目录结构搬过来）。
 
-function handleHandshake() {
-  // 收到手机端的握手：回 ACK 并入桥接
-  send("SF_HANDSHAKE_ACK", {}, "OK");
-  if (!connected) enterBridgeMode();
-}
+### 3. 移植依赖函数
 
-function connect() {
-  // 快应用主动发起握手
-  send("SF_HANDSHAKE", {});
-}
+实现网络状态刷新 `getDeviceInfo`：
 
-// ===== 心跳 =====
-function startHeartbeat() {
-  stopHeartbeat();
-  heartbeatTimer = setInterval(() => {
-    send("SF_PING", { ts: Date.now() });
-    pingTimeoutTimer = setTimeout(() => {
-      // 5 秒没收到 PONG
-      teardown("心跳超时");
-    }, 5000);
-  }, 10000);
-}
+```javascript
+/**
+ * 获取网络信息
+ * @return {Promise<Object>} 网络信息对象
+ */
+export async function getDeviceInfo() {
+  const info = {}
+  try {
+    await new Promise((resolve) => {
+      network.getType({
+        success: (data) => {
+          if (global.NetworkStatus === 'bridge') {
+            info.type = 'bridge'
+            global.fetchAva = true
+          } else {
+            Object.assign(info, data)
+          }
+          resolve()
+        },
+        fail: () => resolve()
+      })
+    })
 
-function stopHeartbeat() {
-  clearInterval(heartbeatTimer);
-  clearTimeout(pingTimeoutTimer);
-  heartbeatTimer = pingTimeoutTimer = null;
-}
-
-// ===== 普通请求 =====
-function request({ url, method = "GET", headers = {}, body = null, timeout = 10000 }) {
-  return new Promise((resolve, reject) => {
-    const id = "sf_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8);
-    const timer = setTimeout(() => {
-      pending.delete(id);
-      reject({ code: 0, data: "请求超时" });
-    }, timeout);
-
-    pending.set(id, { resolve, reject, timer });
-    send("SF_REQUEST", { id, url, method, headers, body, sse: false, timeout });
-  });
-}
-
-function handleResponse(data) {
-  const { id, statusCode, body = "", chunk = 0, totalChunks = 0 } = data;
-  const req = pending.get(id);
-  if (!req) return;
-
-  if (totalChunks > 0) {
-    // 分片：收集 base64 片段
-    let acc = sseChunks.get(id);
-    if (!acc) {
-      acc = { chunks: [], total: totalChunks, statusCode, headers: data.headers };
-      sseChunks.set(id, acc);
+    Object.assign(info, app.getInfo())
+    if (global.NetworkStatus !== 'bridge') {
+      global.fetchAva = !!app.canIUse('@system.fetch')
     }
-    acc.chunks[chunk - 1] = body;
-
-    if (chunk === totalChunks) {
-      sseChunks.delete(id);
-      clearTimeout(req.timer);
-      pending.delete(id);
-      try {
-        const base64 = acc.chunks.join("");
-        const raw = atob(base64);
-        req.resolve({ statusCode: acc.statusCode, headers: acc.headers, body: raw });
-      } catch (e) {
-        req.reject({ code: 0, data: "响应解码失败" });
-      }
-    }
-    return;
+    global.NetworkStatus = info.type
+  } catch (e) {
+    console.error('[X] 获取设备信息失败:', e)
   }
 
-  // 无分片：body 即原始字符串
-  clearTimeout(req.timer);
-  pending.delete(id);
-  req.resolve({ statusCode, headers: data.headers, body });
-}
-
-// ===== SSE =====
-function subscribeSSE({ url, method = "GET", headers = {}, timeout = 30000 }, handlers) {
-  const id = "sf_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8);
-  sseHandlers.set(id, handlers);
-  send("SF_REQUEST", { id, url, method, headers, body: null, sse: true, timeout });
-  return () => send("SF_CLOSE", { id }); // 返回取消函数
-}
-
-// ===== 断开清理 =====
-function teardown(reason = "桥接连接断开") {
-  if (!connected) return;
-  connected = false;
-  stopHeartbeat();
-  global.NetworkStatus = "none";
-  global.fetchAva = false;
-
-  for (const [id, req] of pending) {
-    clearTimeout(req.timer);
-    req.reject({ code: 0, data: reason });
-  }
-  pending.clear();
-  sseChunks.clear();
-
-  for (const [, h] of sseHandlers) h.onError?.(reason);
-  sseHandlers.clear();
-
-  // 刷新快应用网络状态（API 视平台而定）
-  // getDeviceInfo();
-}
-
-// ===== 消息分发 =====
-function onMessage(msg) {
-  const { type, status, data } = msg || {};
-  switch (type) {
-    case "SF_HANDSHAKE":
-      handleHandshake();
-      break;
-    case "SF_HANDSHAKE_ACK":
-      if (!connected) enterBridgeMode();
-      break;
-    case "SF_PONG":
-      clearTimeout(pingTimeoutTimer);
-      break;
-    case "SF_CLOSE_BRIDGE":
-      send("SF_CLOSE_BRIDGE_ACK", {}, "OK");
-      teardown("手机端关闭桥接");
-      break;
-    case "SF_RESPONSE":
-      if (status && status !== "OK") {
-        const req = pending.get(data.id);
-        if (req) {
-          clearTimeout(req.timer);
-          pending.delete(data.id);
-          req.reject({ code: data.statusCode || 0, data: status });
-        }
-      } else {
-        handleResponse(data);
-      }
-      break;
-    case "SF_SSE_EVENT": {
-      const h = sseHandlers.get(data.id);
-      h?.onEvent?.(data.event, data.data);
-      break;
-    }
-    case "SF_SSE_END": {
-      const h = sseHandlers.get(data.id);
-      h?.onEnd?.();
-      sseHandlers.delete(data.id);
-      break;
-    }
-    case "SF_SSE_ERROR": {
-      const h = sseHandlers.get(data.id);
-      h?.onError?.(status || "SSE错误");
-      sseHandlers.delete(data.id);
-      break;
-    }
-  }
-}
-
-export function createBridge(t) {
-  transport = t;
-  transport.onMessage(onMessage);
-  return { connect, request, subscribeSSE, teardown, get connected() { return connected; } };
+  return info
 }
 ```
 
-## 自测清单
+<Callout>
+此处对 ResonaUI 的实现做了简写。理论上，`getDeviceInfo` 只要能正确给 `global.NetworkStatus` 与 `global.fetchAva` 赋值即可。
+</Callout>
 
-<TerminalWindowIcon className="mb-2 inline size-5 text-fd-muted-foreground" weight="duotone" />
+<details>
+<summary>进阶移植：关于global.uiAdm.MessageBox</summary>
 
-- [ ] 收到 `SF_HANDSHAKE` 时回复了 `SF_HANDSHAKE_ACK`，且主动 `connect()` 能握手成功；
-- [ ] 握手后 10 秒一次心跳，PONG 在 5 秒内到达，否则断开；
-- [ ] 响应的 `id` 与请求一致，无分片能直接取 body；
-- [ ] 分片响应按 `chunk` 顺序拼接，整体 `atob` 后再解析；
-- [ ] `Content-Type` 为 JSON 时自动 `JSON.parse`，解析失败回退字符串；
-- [ ] SSE 首个事件在 `timeout` 内到达，`END` / `ERROR` / `CLOSE` 都能正确收尾；
-- [ ] 收到 `SF_CLOSE_BRIDGE` 或互联断开时，待处理请求被 reject、网络状态回退。
+文件中同样有大量 `global.uiAdm.MessageBox`，它只是对 `prompt.showToast` 的简单封装：
 
-## 常见问题
+```javascript
+/**
+ * 显示提示框
+ */
+export function MessageBox(text = '未指定文本', time = 1500) {
+  prompt.showToast({ message: text, duration: time })
+}
+```
+</details>
 
-**Q：握手成功了但请求没反应？**
-检查心跳是否在跑，以及 `SF_REQUEST` 是否通过互联通道真正发了出去；手机端插件需保持在前台。
+### 4. 在 `app.ux` 中初始化
 
-**Q：大响应乱码？**
-几乎都是分片拼接问题：确认是「整体 base64 后切片」，按 `chunk` 从 1 拼到 `totalChunks`，最后只 `atob` 一次。
+在 `app.ux` 中做以下初始化：
 
-**Q：SSE 很快报 `SSE连接超时`？**
-手机端必须在请求 `timeout` 内推来第一条 `SF_SSE_EVENT`。若服务端本身较慢，调大 `SF_REQUEST.timeout`。
+```javascript
+import { initInterconnect } from './common/js/interconnect.js'
 
-**Q：需要在快应用里自己实现 HTTP 吗？**
-不需要。普通 HTTP/SSE 全部由手机端 SimpleFetch 完成，快应用只收发协议消息。
+export default {
+  async onCreate() {
+    initInterconnect()
+  },
+}
+```
 
-更多字段细节与完整时序图见 [通信协议](./protocol)。
+### 5. 在实际代码中使用
+
+```javascript
+import fetch from '@system.fetch'
+import * as simpleFetch from './simpleFetch.js'
+
+/**
+ * 发送网络请求
+ * @param {string} url 请求地址
+ * @return {Object} 请求结果
+ */
+export async function sendFetch(url) {
+  // 检查网络状态
+  if (global.NetworkStatus === 'none') {
+    console.log('[X] 无网络连接')
+    return { status: 503, result: '无网络连接' }
+  }
+
+  const requestConfig = { timeout: 10000 }
+  requestConfig.url = encodeURI(url)
+  requestConfig.method = 'GET'
+
+  // 桥接模式走 SimpleFetch，否则走原生 fetch
+  const fetcher = global.NetworkStatus === 'bridge' ? simpleFetch : fetch
+
+  try {
+    const response = await fetcher.fetch(requestConfig)
+    return response.data.data
+  } catch (e) {
+    console.log('[X] 请求异常:', e)
+  }
+}
+```
+
+<Callout>
+设计上，SimpleFetch 的 `fetch` 函数返回值与 `@system.fetch` **完全一致**，因此可以直接替换系统 fetch 使用。
+</Callout>
+
+---
+
+## 接入后检查清单
+
+- [ ] `sendInterconnectData` 已对接你自己的发送函数（或已复用 `interconnect.js`）；
+- [ ] `getDeviceInfo` 能正确设置 `global.NetworkStatus` 与 `global.fetchAva`；
+- [ ] `app.ux` 启动时调用了 `initInterconnect()`（从零接入时）；
+- [ ] 桥接模式下请求确实走 `simpleFetch.fetch`，非桥接时回退原生 `@system.fetch`；
+- [ ] 握手机制生效：心跳每 10 秒发送，超时能断开并重连。
+
+握手、心跳、分片、SSE 等字段细节与完整时序见 [通信协议](./protocol)。
