@@ -14,7 +14,7 @@ import {
 
 本指南面向**快应用开发者**，将指导你把自己的快应用接入 SimpleFetch 以实现联网。
 
-通信协议的字段级定义见 [通信协议](./protocol)，本文仅介绍**如何接入** SimpleFetch。
+通信协议的字段级定义见 [通信协议](../protocol)，本文仅介绍**如何接入** SimpleFetch。
 
 ## 它是怎么工作的
 
@@ -350,4 +350,4 @@ export async function sendFetch(url) {
 - [ ] 桥接模式下请求确实走 `simpleFetch.fetch`，非桥接时回退原生 `@system.fetch`；
 - [ ] 握手机制生效：心跳每 10 秒发送，超时能断开并重连。
 
-握手、心跳、分片、SSE 等字段细节与完整时序见 [通信协议](./protocol)。
+握手、心跳、分片、SSE 等字段细节与完整时序见 [通信协议](../protocol)。
