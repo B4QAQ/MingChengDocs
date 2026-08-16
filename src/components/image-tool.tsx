@@ -63,12 +63,14 @@ export function ImageTool() {
   const [panY, setPanY] = useState<number>(0);
 
   const [format, setFormat] = useState<Format>("image/png");
-  const [quality, setQuality] = useState<number>(0.92);
+  const [quality, setQuality] = useState<number>(1);
   const [blur, setBlur] = useState<number>(0);
   const [overlay, setOverlay] = useState<number>(0); // 黑色遮罩浓度 0-100
 
   const [outUrl, setOutUrl] = useState<string>("");
   const [outSize, setOutSize] = useState<number>(0);
+  const [compressed, setCompressed] = useState<boolean>(false);
+  const [compressing, setCompressing] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -109,6 +111,36 @@ export function ImageTool() {
     return ((srcSize - outSize) / srcSize) * 100;
   }, [srcSize, outSize]);
 
+  // any edit to the image invalidates a previous compression result
+  const editKey = [
+    targetW,
+    targetH,
+    presetIdx,
+    customW,
+    customH,
+    cropMode,
+    rotation,
+    panX,
+    panY,
+    blur,
+    overlay,
+    format,
+    quality,
+  ].join("|");
+  const editKeyRef = useRef<string>(editKey);
+  useEffect(() => {
+    if (editKeyRef.current !== editKey) {
+      editKeyRef.current = editKey;
+      if (compressed) {
+        setCompressed(false);
+        if (outUrl) URL.revokeObjectURL(outUrl);
+        setOutUrl("");
+        setOutSize(0);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editKey]);
+
   // ===== file handling =====
   const handleFile = useCallback(
     (file: File) => {
@@ -124,6 +156,10 @@ export function ImageTool() {
       setRotation(0);
       setPanX(0);
       setPanY(0);
+      setCompressed(false);
+      if (outUrl) URL.revokeObjectURL(outUrl);
+      setOutUrl("");
+      setOutSize(0);
       const img = new Image();
       img.onload = () => {
         setImgEl(img);
@@ -157,6 +193,7 @@ export function ImageTool() {
     setFileName("");
     setSrcSize(0);
     setOutSize(0);
+    setCompressed(false);
     setError("");
     setRotation(0);
     setPanX(0);
@@ -268,19 +305,9 @@ export function ImageTool() {
       ctx.fillStyle = `rgba(0,0,0,${overlay / 100})`;
       ctx.fillRect(0, 0, w, h);
     }
-
-    // export
-    const encoderQuality = format === "image/jpeg" ? quality : undefined;
-    canvas.toBlob(
-      (blob) => {
-        if (!blob) return;
-        if (outUrl) URL.revokeObjectURL(outUrl);
-        setOutUrl(URL.createObjectURL(blob));
-        setOutSize(blob.size);
-      },
-      format,
-      encoderQuality,
-    );
+    // NOTE: PNG quantization / encoding happens in compress() after the
+    // user clicks "压缩图片", so the live preview reflects edits and the
+    // compressed preview reflects the actual exported bytes.
   }, [
     imgEl,
     targetW,
@@ -291,14 +318,59 @@ export function ImageTool() {
     panY,
     blur,
     overlay,
-    format,
-    quality,
-    outUrl,
   ]);
 
   useLayoutEffect(() => {
     render();
   }, [render]);
+
+  // ===== compress & export =====
+  const compress = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !imgEl) {
+      setError("请先选择图片");
+      return;
+    }
+    setError("");
+    setCompressing(true);
+
+    // draw latest edits onto canvas first
+    render();
+
+    const ctx = canvas.getContext("2d");
+    const w = canvas.width;
+    const h = canvas.height;
+
+    // PNG color quantization for real size reduction
+    if (format === "image/png" && quality < 0.98 && ctx) {
+      const levels = Math.max(2, Math.round(quality * 8)); // 2..7 per channel
+      const step = 256 / levels;
+      const img = ctx.getImageData(0, 0, w, h);
+      const d = img.data;
+      for (let i = 0; i < d.length; i += 4) {
+        d[i] = Math.min(255, Math.round(d[i] / step) * step);
+        d[i + 1] = Math.min(255, Math.round(d[i + 1] / step) * step);
+        d[i + 2] = Math.min(255, Math.round(d[i + 2] / step) * step);
+      }
+      ctx.putImageData(img, 0, 0);
+    }
+
+    canvas.toBlob(
+      (blob) => {
+        setCompressing(false);
+        if (!blob) {
+          setError("压缩失败");
+          return;
+        }
+        if (outUrl) URL.revokeObjectURL(outUrl);
+        setOutUrl(URL.createObjectURL(blob));
+        setOutSize(blob.size);
+        setCompressed(true);
+      },
+      format,
+      quality,
+    );
+  }, [imgEl, format, quality, outUrl, render]);
 
   // ===== drag to pan (cover mode) =====
   const onPointerDown = (e: React.PointerEvent) => {
@@ -418,12 +490,28 @@ export function ImageTool() {
                       : ""
                   }`}
                 />
+                {compressed && (
+                  <span className="absolute right-3 top-3 rounded-full bg-emerald-500/90 px-2 py-0.5 text-[11px] font-medium text-white shadow">
+                    已压缩
+                  </span>
+                )}
+                {compressing && (
+                  <span className="absolute right-3 top-3 rounded-full bg-fd-primary/90 px-2 py-0.5 text-[11px] font-medium text-white shadow">
+                    压缩中…
+                  </span>
+                )}
               </div>
 
               {canPan && hasOverflow && (
                 <p className="flex items-center gap-1.5 text-xs text-fd-muted-foreground">
                   <ArrowsOutCardinalIcon className="size-3.5" />
                   在预览图上拖动可调整裁剪区域
+                </p>
+              )}
+
+              {!compressed && imgEl && (
+                <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-600 dark:text-amber-400">
+                  调整好裁剪、模糊、遮罩等参数后，点击右侧「压缩图片」生成最终图片，预览会显示压缩后的效果。
                 </p>
               )}
 
@@ -594,25 +682,30 @@ export function ImageTool() {
               ))}
             </div>
 
-            {format === "image/jpeg" && (
-              <label className="mt-3 block">
-                <div className="mb-1 flex items-center justify-between text-xs">
-                  <span className="text-fd-muted-foreground">质量</span>
-                  <span className="font-mono text-fd-foreground">
-                    {Math.round(quality * 100)}%
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min={0.3}
-                  max={1}
-                  step={0.01}
-                  value={quality}
-                  onChange={(e) => setQuality(Number(e.target.value))}
-                  className="w-full accent-fd-primary"
-                />
-              </label>
-            )}
+            <label className="mt-3 block">
+              <div className="mb-1 flex items-center justify-between text-xs">
+                <span className="text-fd-muted-foreground">
+                  {format === "image/png" ? "压缩 / 色彩" : "质量"}
+                </span>
+                <span className="font-mono text-fd-foreground">
+                  {Math.round(quality * 100)}%
+                </span>
+              </div>
+              <input
+                type="range"
+                min={0.3}
+                max={1}
+                step={0.01}
+                value={quality}
+                onChange={(e) => setQuality(Number(e.target.value))}
+                className="w-full accent-fd-primary"
+              />
+              <p className="mt-1 text-[11px] leading-tight text-fd-muted-foreground">
+                {format === "image/png"
+                  ? "PNG 为无损格式，调低将减少颜色数以减小体积（可能出现色带）；拉满即无损。"
+                  : "JPG 质量越低体积越小，画质也会下降。"}
+              </p>
+            </label>
           </div>
 
           <div className="h-px bg-fd-border/60" />
@@ -661,14 +754,29 @@ export function ImageTool() {
             </p>
           )}
 
-          <button
-            onClick={download}
-            disabled={!outUrl}
-            className="mt-auto inline-flex items-center justify-center gap-2 rounded-xl bg-fd-primary px-4 py-2.5 text-sm font-semibold text-fd-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            <ArrowDownIcon className="size-4" weight="bold" />
-            下载图片
-          </button>
+          <div className="mt-auto flex flex-col gap-2">
+            <button
+              onClick={compress}
+              disabled={!imgEl || compressing}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-fd-primary bg-fd-primary/10 px-4 py-2.5 text-sm font-semibold text-fd-primary transition-colors hover:bg-fd-primary/20 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <SparkleIcon className="size-4" weight="bold" />
+              {compressing ? "压缩中…" : compressed ? "重新压缩" : "压缩图片"}
+            </button>
+            <button
+              onClick={download}
+              disabled={!compressed}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-fd-primary px-4 py-2.5 text-sm font-semibold text-fd-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <ArrowDownIcon className="size-4" weight="bold" />
+              下载图片
+            </button>
+            {!compressed && (
+              <p className="text-center text-[11px] text-fd-muted-foreground">
+                压缩后才能下载
+              </p>
+            )}
+          </div>
         </aside>
       </div>
     </div>
