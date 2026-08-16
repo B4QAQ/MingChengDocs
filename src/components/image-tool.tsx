@@ -302,13 +302,20 @@ export function ImageTool() {
 
   // ===== drag to pan (cover mode) =====
   const onPointerDown = (e: React.PointerEvent) => {
-    if (!imgEl || cropMode !== "cover") return;
+    if (!imgEl || cropMode !== "cover" || !hasOverflow) return;
+    // 阻止触摸滚动/缩放在 canvas 上触发
+    e.preventDefault();
     dragRef.current = true;
     lastPos.current = { x: e.clientX, y: e.clientY };
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    try {
+      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    } catch {
+      /* noop */
+    }
   };
   const onPointerMove = (e: React.PointerEvent) => {
     if (!dragRef.current || !canvasRef.current) return;
+    e.preventDefault();
     const rect = canvasRef.current.getBoundingClientRect();
     const scale = canvasRef.current.width / rect.width;
     const dx = (e.clientX - lastPos.current.x) * scale;
@@ -405,7 +412,7 @@ export function ImageTool() {
                   onPointerMove={onPointerMove}
                   onPointerUp={onPointerUp}
                   onPointerCancel={onPointerUp}
-                  className={`max-h-[520px] max-w-full rounded-lg shadow-xl ${
+                  className={`max-h-[520px] max-w-full touch-none select-none rounded-lg shadow-xl ${
                     canPan && hasOverflow
                       ? "cursor-grab active:cursor-grabbing"
                       : ""
