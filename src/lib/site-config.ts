@@ -49,4 +49,5 @@ export const topNavLinks: MainItemType[] = [
   { text: "腕上信驿", url: "/docs/wearpost", active: "nested-url" },
   { text: "SimpleFetch", url: "/docs/simplefetch", active: "nested-url" },
   { text: "铭诚API", url: "/docs/mingcheng-api", active: "nested-url" },
+  { text: "图片处理", url: "/tools/image", active: "url" },
 ];
